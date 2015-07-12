@@ -1,0 +1,17 @@
+# sterownik silników deep-robots:
+
+Int1, *Int2 jeden silnik - przód i tył
+*Int3, Int4 analogicznie
+Wyjścia podłączamy do wyjść cyfrowych w arduino D9, D10, D11, D12
+Zasilamy sterownik 5v z arduino z uziemieniem
+Zasilanie na razie ok 4v 4x1,2V akulmulatorki
+
+
+# praca z bluetooth
+zasilanie 3,3V! 
+podłączamy do wyjść 5,6 digital (pracują jako pwm)
+parowanie z komórką (kod 1234) HC05
+arduino control car aplikacja na androida: a naprzód, e tył, d prawo, b lewo, f ON, g OFF
+
+# miernik utrasoniczny?? 
+

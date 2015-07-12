@@ -35,15 +35,15 @@ void loop() // run over and over
          break;
           case 'd':
          digitalWrite(9,0);
-         digitalWrite(10,1);
-         digitalWrite(11,1);
-         digitalWrite(12,0);
-         break;
-          case 'b':
-         digitalWrite(9,1);
          digitalWrite(10,0);
          digitalWrite(11,0);
          digitalWrite(12,1);
+         break;
+          case 'b':
+         digitalWrite(9,0);
+         digitalWrite(10,1);
+         digitalWrite(11,0);
+         digitalWrite(12,0);
          break;
          case 'c':
          digitalWrite(9,0);
@@ -54,8 +54,14 @@ void loop() // run over and over
          default:
          break;
      }
+    } else
+    {
+      digitalWrite(9,0);
+      digitalWrite(10,0);
+      digitalWrite(11,0);
+      digitalWrite(12,0);
     }
      
-     delay(500);
+     delay(50);
      
 }
