@@ -1,0 +1,16 @@
+Arduino Mega
+
+hour: 27 to 32 digiatal 
+minutes 22 to 26
+seconds 33 digital
+and ground
+
+rtc I2C
+5v
+GND
+SCL 21 pin + brigde 10kOhm to 5V
+SDA 20 pin + bridge 10kOhm to 5V
+
+
+
+

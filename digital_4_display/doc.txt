@@ -1,0 +1,6 @@
+4 digit display
+
+vcc  5V
+gnd  
+CLK 2 pin digital
+DIO 3 pin digital

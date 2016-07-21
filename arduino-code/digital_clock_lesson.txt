@@ -1,0 +1,7 @@
+1. blinking led
+2. two led blinking one at once
+3. blinking moving (only one is on)
+3a. play with effects of light - self compositons
+4. decimal to binary alorthm 
+5. decimal max 255 to binary with 8 led 
+6. project of binary clock
