@@ -1,7 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #define PIN            3
-#define NUMPIXELS      16
+#define NUMPIXELS      8
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN,
 NEO_GRB + NEO_KHZ800);
@@ -55,10 +55,10 @@ void switchOff(int nr) {
 }
 
 void rainbow(uint8_t p, uint8_t trans){
-  trans %= 8;
+  trans %= NUMPIXELS/2;
   uint8_t r = 0;
   for(uint8_t i = 0; i < NUMPIXELS; i++){
-    r = (i+ trans) % 8;
+    r = (i+ trans) % NUMPIXELS/2;
     switch(r){
       case 0: 
       setRed(i, p);
@@ -192,7 +192,7 @@ boolean snakeIfOnLed(int i, uint8_t start, uint8_t end, uint8_t N) {
 
 void snakeMove() {
   uint8_t pow = 120;
-  uint8_t NUMB = 10;
+  uint8_t NUMB = 4;
   uint8_t start = 0;
   uint8_t end = NUMB;
   uint8_t r = 0;
@@ -228,7 +228,7 @@ void snakeMove() {
 
 void snakeMoveColor() {
   uint8_t pow = 120;
-  uint8_t NUMB = 8;
+  uint8_t NUMB = 4;
   uint8_t start = 0;
   uint8_t end = NUMB;
   uint8_t pos = 0;
