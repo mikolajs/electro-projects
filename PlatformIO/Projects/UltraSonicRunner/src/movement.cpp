@@ -15,3 +15,31 @@ void Motors::forward(){
     digitalWrite(B_1, HIGH);
     digitalWrite(B_2, LOW);
 };
+
+void Motors::backward(){
+    digitalWrite(A_1, LOW);
+    digitalWrite(A_2, HIGH);
+    digitalWrite(B_1, LOW);
+    digitalWrite(B_2, HIGH);
+};
+
+void Motors::stop(){
+    digitalWrite(A_1, LOW);
+    digitalWrite(A_2, LOW);
+    digitalWrite(B_1, LOW);
+    digitalWrite(B_2, LOW);
+};
+
+void Motors::left(){
+    digitalWrite(A_1, HIGH);
+    digitalWrite(A_2, LOW);
+    digitalWrite(B_1, LOW);
+    digitalWrite(B_2, HIGH);
+};
+
+void Motors::right(){
+    digitalWrite(A_1, LOW);
+    digitalWrite(A_2, HIGH);
+    digitalWrite(B_1, HIGH);
+    digitalWrite(B_2, LOW);
+};
