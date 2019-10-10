@@ -2,7 +2,7 @@
 #include <ESP8266WiFi.h>
 
 
-const int leftF = 1;
+const int leftF = -1;
 const int rightF = 1; 
 const int pinL = 4;
 const int pinR = 5;
@@ -15,13 +15,13 @@ long currentTime;
 long previousTime;
 long timeoutTime = 2000;
 String header;
-bool stopedL = true;
-bool stopedR = true;
+//bool stopedL = true;
+//bool stopedR = true;
 
 Servo servoLeft;
 Servo servoRight;
 
-void stopR(){
+/*void stopR(){
   if(!stopedR) {
     Serial.println("stopR");
     servoRight.detach();
@@ -36,58 +36,35 @@ void stopL(){
     stopedL = true;
   }
 }
+*/
 
 void moveR(){
-  stopL();
-  if(stopedR){
-    servoRight.attach(pinR);
-    stopedR = false;
-  }
+  servoLeft.write(90);
   servoRight.write(360*rightF);
   lastCommand = millis(); 
 }
 
 void moveL(){
-  stopR();
-  if(stopedL){
-    servoLeft.attach(pinL);
-    stopedL = false;
-  }
+  servoRight.write(90);
   servoLeft.write(360*leftF);
   lastCommand = millis();  
 }
 
 void moveF(){
-  if(stopedL){
-    servoLeft.attach(pinL);
-  }
-  if(stopedR){
-    servoRight.attach(pinR);
-  }
   servoLeft.write(360*leftF); 
-  stopedL = false;
   servoRight.write(360*rightF); 
-  stopedR = false;
   lastCommand = millis(); 
 }
 
 void moveB(){
-  if(stopedL){
-    servoLeft.attach(pinL);
-  }
-  if(stopedR){
-    servoRight.attach(pinR);
-  }
   servoLeft.write(-360*leftF); 
-  stopedL = false;
   servoRight.write(-360*rightF); 
-  stopedR = false;
   lastCommand = millis(); 
 }
 
 void stopAll(){
-  stopR();
-  stopL();
+ servoLeft.write(90);
+ servoRight.write(90);
 }
 
 void setup() {
@@ -101,6 +78,8 @@ void setup() {
 
 void loop() {
     WiFiClient client = server.available();  
+    servoLeft.attach(pinL);
+    servoRight.attach(pinR);
 //    servoLeft.write(360);
 //    servoRight.write(360);
 //    delay(5000); 
@@ -199,8 +178,8 @@ void loop() {
 //  Serial.println(millis() - lastCommand);
 //  Serial.println(stopedL);
 //  Serial.println(stopedR);
-  if((!stopedL || !stopedR) && (millis() - lastCommand) >= 2000){
-      Serial.println("stop");
-      stopAll();
-    }
+//  if( (millis() - lastCommand) >= 2000){
+//      Serial.println("stop");
+//      stopAll();
+//    }
 }
