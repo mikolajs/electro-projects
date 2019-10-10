@@ -1,8 +1,6 @@
 #include <Servo.h>
 #include <ESP8266WiFi.h>
 
-//const char* ssid     = "UPCFDD5BF8";
-//const char* password = "w7bkvsrExkye";
 
 const int leftF = 1;
 const int rightF = 1; 
