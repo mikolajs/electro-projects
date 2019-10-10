@@ -13,8 +13,9 @@
 */
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
+#include <Servo.h>
 
-const char *ssid = "fablabauto1"// SSID Name
+const char *ssid = "fablabauto1"; // SSID Name
 const char *password = "12345678"; // SSID Password : Between 8 and 32 carateres
 
 IPAddress ip(192, 168, 4, 1); // IP Address
@@ -23,8 +24,8 @@ const int port = 80; // Port
 ESP8266WebServer server(port);
 
 // Motors pins
-static const uint8_t motor_r = 5 ;
-static const uint8_t motor_l = 4;
+static const uint8_t motor_r = 0 ;
+static const uint8_t motor_l = 5;
 Servo servo_r;
 Servo servo_l;
 
@@ -40,7 +41,10 @@ void setup() {
 }
 
 void loop() {
-  server.handleClient();
+   servo_r.write(-360);
+  servo_l.write(-360);
+  delay(1000);                                                                                                                                                                                                                                                                                          
+  //server.handleClient();
 }
 
 void handleRoot() {
@@ -93,4 +97,3 @@ void turn_right() {
   servo_r.write(-360);
   servo_l.write(360);
 }
-
