@@ -1,22 +1,32 @@
-#include <Servo.h>
+
 #include <ESP8266WiFi.h>
 
 
-const int leftF = -1;
-const int rightF = 1; 
-const int pinL = 4;
-const int pinR = 5;
+const int pinPWML = 4;
+const int pinPWMR = 5;
+const int pinDL = 0;
+const int pinDR = 2;
+int power = 1023;
+char lastCommand = ' ';
 
 WiFiServer server(80);
 
 
-long lastCommand = 0;
+long lastCommandTime = 0;
 long currentTime;
 long previousTime;
 long timeoutTime = 2000;
 String header;
 //bool stopedL = true;
 //bool stopedR = true;
+
+void showPage(WiFiClient& client);
+void left();
+void right();
+void forward();
+void backward();
+void stop();
+void setPower(int p);
 
 
 void setup() {
@@ -26,9 +36,13 @@ void setup() {
   Serial.println("WIFI IP address");
   Serial.println(WiFi.localIP());
   server.begin();
+  pinMode(pinPWML, OUTPUT);
+  pinMode(pinPWMR, OUTPUT);
+  pinMode(pinDR, OUTPUT);
+  pinMode(pinDL, OUTPUT);
 }
 
-void showPage(WifiClient& client){
+void showPage(WiFiClient& client){
 	client.println("<!DOCTYPE html><html> <head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
         client.println("<link rel=\"icon\" href=\"data:,\">");
             client.println("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");
@@ -58,30 +72,39 @@ char getCommand(String header){
  // turns the GPIOs on and off
 	    if(header.length() < 14) return 'i';
             if (header.indexOf("GET /command/f") >= 0) {
+              lastCommand = 'f';
               Serial.println("f");
-              return 'f'
+              return 'f';
             } else if (header.indexOf("GET /command/b") >= 0) {
+              lastCommand = 'b';
               Serial.println("b");
               return 'b';
             } else if (header.indexOf("GET /command/r") >= 0) {
+              lastCommand = 'b';
               Serial.println("r");
               return 'r';
             } else if (header.indexOf("GET /command/l") >= 0) {
+              lastCommand = 'l';
               Serial.println("l");
               return 'l';
             } else if (header.indexOf("GET /command/x") >= 0) {
+              lastCommand = 'x';
               Serial.println("x");
               return 'x';
             } else if (header.indexOf("GET /command/a") >= 0) {
+              lastCommand = 'a';
               Serial.println("a");
               return 'a';
             } else if (header.indexOf("GET /command/u") >= 0) {
+              lastCommand = 'u';
               Serial.println("u");
               return 'u';
             } else if (header.indexOf("GET /command/d") >= 0) {
+              lastCommand = 'd';
               Serial.println("d");
               return 'd';
             } else if (header.indexOf("GET /command/c") >= 0) {
+              lastCommand = 'c';
               Serial.println("c");
               return 'c';
             } else if (header.indexOf("GET /command/0") >= 0) {
@@ -111,7 +134,7 @@ char getCommand(String header){
             } else if (header.indexOf("GET /command/8") >= 0) {
               Serial.println("8");
               return '8';
-            } else return '-';
+            } else return 'i';
 }
 
 void loop() {
@@ -142,7 +165,39 @@ void loop() {
             
             char command = getCommand(header);
             
-            if(command == i) showPage(client);
+            if(command == 'i') showPage(client);
+            else {
+              switch(command){
+                case 'f':
+                 forward();
+                 break;
+                case 'b':
+                 backward();
+                 break;
+                case 'x':
+                 stop();
+                 break;
+                case 'r':
+                 right();
+                 break;
+                case 'l':
+                 left();
+                 break; 
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                setPower((int)command-48);
+                break;
+                default:
+                break;
+              }
+            }
             break;
           } else { // if you got a newline, then clear currentLine
             currentLine = "";
@@ -170,4 +225,49 @@ void loop() {
 //      Serial.println("stop");
 //      stopAll();
 //    }
+}
+
+void forward(){
+  digitalWrite(pinDR, HIGH);
+  digitalWrite(pinDL, HIGH);
+  analogWrite(pinPWMR, power);
+  analogWrite(pinPWML, power);
+}
+void backward(){
+  digitalWrite(pinDR, LOW);
+  digitalWrite(pinDL, LOW);
+  analogWrite(pinPWMR, power);
+  analogWrite(pinPWML, power);
+}
+
+void left(){
+  digitalWrite(pinDR, HIGH);
+  digitalWrite(pinDL, LOW);
+  analogWrite(pinPWMR, power);
+  analogWrite(pinPWML, power);
+}
+
+void right(){
+  digitalWrite(pinDR, LOW);
+  digitalWrite(pinDL, HIGH);
+  analogWrite(pinPWMR, power);
+  analogWrite(pinPWML, power);
+}
+
+void stop(){
+  analogWrite(pinPWMR, 0);
+  analogWrite(pinPWML, 0);
+}
+
+void setPower(int p){
+  if(p == 0) power = 0;
+  else {
+    power = 512;
+    for(int i = 0; i < p; i++) power += 64;
+    power--;
+  }
+  if(lastCommand != 'x') {
+   analogWrite(pinPWMR, power);
+   analogWrite(pinPWML, power);
+  }
 }
