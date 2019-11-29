@@ -1,74 +1,31 @@
-#include <Servo.h>
+//#include <Servo.h>
 #include <ESP8266WiFi.h>
 
 
-const int leftF = -1;
-const int rightF = 1; 
-const int pinL = 4;
-const int pinR = 5;
+const int STEP_1 = 5;
+const int STEP_2 = 4;
+const int STEP_3 = 0;
+const int STEP_4 = 2;
+
+int move = 0; // -1 down 1 up 0 stop
+
+
+const int WAIT = 2;
 
 WiFiServer server(80);
-
 
 long lastCommand = 0;
 long currentTime;
 long previousTime;
 long timeoutTime = 2000;
 String header;
-//bool stopedL = true;
-//bool stopedR = true;
 
-Servo servoLeft;
-Servo servoRight;
-
-/*void stopR(){
-  if(!stopedR) {
-    Serial.println("stopR");
-    servoRight.detach();
-    stopedR = true;
-  }
-}
-
-void stopL(){
-  if(!stopedL) {
-    Serial.println("stopL");
-    servoLeft.detach();
-    stopedL = true;
-  }
-}
-*/
-
-void moveR(){
-  servoLeft.write(-360*leftF);
-  servoRight.write(360*rightF);
-  lastCommand = millis(); 
-}
-
-void moveL(){
-  servoLeft.write(360*leftF);
-   servoRight.write(-360*rightF);
-  lastCommand = millis();  
-}
-
-void moveF(){
-  servoLeft.write(360*leftF); 
-  servoRight.write(360*rightF); 
-  lastCommand = millis(); 
-}
-
-void moveB(){
-  servoLeft.write(-360*leftF); 
-  servoRight.write(-360*rightF); 
-  lastCommand = millis(); 
-}
-
-void stopAll(){
- servoLeft.write(90);
- servoRight.write(90);
-}
-
-void setup() {
-  Serial.begin(115200);
+void setup(){
+  pinMode(STEP_1, OUTPUT);
+  pinMode(STEP_2, OUTPUT);
+  pinMode(STEP_3, OUTPUT);
+  pinMode(STEP_4, OUTPUT);
+   Serial.begin(115200);
   WiFi.mode(WIFI_AP);
   WiFi.softAP("MiniAutko01", "12345678");
   Serial.println("WIFI IP address");
@@ -76,18 +33,71 @@ void setup() {
   server.begin();
 }
 
+void stepDown(){
+  digitalWrite(STEP_1, LOW);
+  digitalWrite(STEP_2, LOW);
+  digitalWrite(STEP_3, LOW);
+  digitalWrite(STEP_4, HIGH);
+  delay(WAIT);
+  digitalWrite(STEP_1, LOW);
+  digitalWrite(STEP_2, LOW);
+  digitalWrite(STEP_3, HIGH);
+  digitalWrite(STEP_4, LOW);
+  delay(WAIT);
+  digitalWrite(STEP_1, LOW);
+  digitalWrite(STEP_2, HIGH);
+  digitalWrite(STEP_3, LOW);
+  digitalWrite(STEP_4, LOW);
+  delay(WAIT);
+  digitalWrite(STEP_1, HIGH);
+  digitalWrite(STEP_2, LOW);
+  digitalWrite(STEP_3, LOW);
+  digitalWrite(STEP_4, LOW);
+  delay(WAIT);
+}
+
+void stepUp(){
+  digitalWrite(STEP_1, HIGH);
+  digitalWrite(STEP_2, LOW);
+  digitalWrite(STEP_3, LOW);
+  digitalWrite(STEP_4, LOW);
+  delay(WAIT);
+  digitalWrite(STEP_1, LOW);
+  digitalWrite(STEP_2, HIGH);
+  digitalWrite(STEP_3, LOW);
+  digitalWrite(STEP_4, LOW);
+  delay(WAIT);
+  digitalWrite(STEP_1, LOW);
+  digitalWrite(STEP_2, LOW);
+  digitalWrite(STEP_3, HIGH);
+  digitalWrite(STEP_4, LOW);
+  delay(WAIT);
+  digitalWrite(STEP_1, LOW);
+  digitalWrite(STEP_2, LOW);
+  digitalWrite(STEP_3, LOW);
+  digitalWrite(STEP_4, HIGH);
+  delay(WAIT);
+}
+
+void mkMove(){
+  switch(move){
+    case -1: 
+      stepUp();
+      break;
+    case 1: 
+      stepDown();
+      break;
+    default:
+      break;
+  }
+}
+
+
 void loop() {
-    WiFiClient client = server.available();  
-    servoLeft.attach(pinL);
-    servoRight.attach(pinR);
-//    servoLeft.write(360);
-//    servoRight.write(360);
-//    delay(5000); 
-//    servoLeft.write(-360);
-//    servoRight.write(-360);
-//    delay(5000);
-//    Serial.println("WIFI IP address");
-//    Serial.println(WiFi.localIP());
+    WiFiClient client = server.available(); 
+    
+      mkMove();
+    
     if (client) {                             
     Serial.println("New Client.");          
     String currentLine = "";         
@@ -113,21 +123,14 @@ void loop() {
             // turns the GPIOs on and off
             if (header.indexOf("GET /command/f") >= 0) {
               Serial.println("FORWARD");
-              moveF();
+              move = 1;
             } else if (header.indexOf("GET /command/b") >= 0) {
               Serial.println("BACKWARD");
-              moveB();
-            } else if (header.indexOf("GET /command/r") >= 0) {
-              Serial.println("RIGHT");
-              moveR();
-            } else if (header.indexOf("GET /command/l") >= 0) {
-              Serial.println("LEFT");
-              moveL();
-            } else if (header.indexOf("GET /command/s") >= 0) {
+              move = -1;
+            } else if(header.indexOf("GET /command/s") >= 0) {
               Serial.println("STOP");
-              stopAll();
-            }
-            
+              move = 0;
+            } 
             // Display the HTML web page
             client.println("<!DOCTYPE html><html>");
             client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
@@ -143,10 +146,8 @@ void loop() {
             client.println("<body><h1>ESP8266 Web Server</h1>");
             
             // Display current state, and ON/OFF buttons for GPIO 5  
-            client.println("<p><a href=\"/command/f\"><button class=\"button\">Forward</button></a></p>");
-            client.println("<p><a href=\"/command/l\"><button class=\"button\">Left</button></a>");
-            client.println("<a href=\"/command/r\"><button class=\"button\">Right</button></a></p>");
-            client.println("<p><a href=\"/command/b\"><button class=\"button\">Backward</button></a></p>");
+            client.println("<p><a href=\"/command/f\"><button class=\"button\">UP</button></a></p>");
+            client.println("<p><a href=\"/command/b\"><button class=\"button\">DOWN</button></a></p>");
              
             client.println("<p><a href=\"/command/s\"><button class=\"button\">STOP</button></a></p>");
            
