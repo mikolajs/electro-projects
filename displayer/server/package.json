@@ -10,6 +10,6 @@
   "license": "BSD-2-Clause",
   "dependencies": {
     "express": "~4.12.4",
-    "mongodb": "~2.0.35"
+    "mongodb": "~3.6.1"
   }
 }
