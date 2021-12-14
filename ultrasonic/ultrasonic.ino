@@ -1,7 +1,7 @@
 #include <Ultrasonic.h>
 
-int trig = 12;
-int echo = 13;
+int trig = 16;
+int echo = 5;
 int power = 14;
 int led = 19;
 

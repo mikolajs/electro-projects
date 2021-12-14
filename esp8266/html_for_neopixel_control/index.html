@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <script type="text/javascript">
+      function runjs(id){
+        let client = new XMLHttpRequest();
+        client.open('GET', '/command/' + id.toString());
+        client.send(null);}
+    </script>
+    <style media="screen">
+      .aBox {
+        width: 40%; border: solid 2px black; margin: 4%; height: 100px;  text-align: center;
+        vertical-align: middle; display: inline-block; border-radius: 10px; align-items: center;
+      }
+      .c1 {background-color: SlateBlue; }
+      .c2 {background-color: Tomato; }
+      .c3 {background-color: MediumSeaGreen; }
+      .c4 {background-color: Violet; }
+      .c5 {background-color: Orange; }
+      .c6 {background-color: DodgerBlue; }
+      .innerText {  position: relative; margin: auto; font-size: 2em; color: white; top: 30%;}
+    </style>
+  </head>
+  <body>
+    <div class="main">
+      <div class="aBox c1" onclick="runjs(1)">
+        <span class="innerText">Animacja 1</span>
+      </div>
+      <div class="aBox c2" onclick="runjs(2)">
+        <span class="innerText">Animacja 2</span>
+      </div>
+      <div class="aBox c3" onclick="runjs(3)">
+        <span class="innerText">Animacja 3</span>
+      </div>
+      <div class="aBox c4" onclick="runjs(4)">
+        <span class="innerText">Animacja 4</span>
+      </div>
+      <div class="aBox c5" onclick="runjs(5)">
+        <span class="innerText">Animacja 5</span>
+      </div>
+      <div class="aBox c6" onclick="runjs(6)">
+        <span class="innerText">Animacja 6</span>
+      </div>
+    </div>
+  </body>
+</html>
