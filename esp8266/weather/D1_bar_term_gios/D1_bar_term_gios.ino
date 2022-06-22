@@ -2,6 +2,12 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <DHT.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BMP280.h>
+
+
 
 const char* ssid     = "sweethome12";
 const char* password = "9A0033D4";
@@ -10,9 +16,12 @@ const int dhtpin = 2;
 
 WiFiServer server(80);
 
+
 DHT dht(dhtpin, DHT22);
+Adafruit_BMP280 bmp;
 float t = 0;
 float h = 0;
+float p = 0;
 int lastCommand = 0;
 String giosInfo;
 
@@ -95,12 +104,12 @@ client.println("</html>");
 }
 
 void getAir(){
-  const char* url = "/pjp-api/rest/aqindex/getIndex/736";
-  const char* host = "api.gios.gov.pl";   
+  const char* url = "/get/736";
+  const char* host = "localhost:8008";   
   giosInfo = "";  
-  WiFiClientSecure client;
+  WiFiClient client;
   //client.setInsecure(); //the magic line, use with caution
-  if(!client.connect(host, 443)) Serial.println("Not connected to GIOS host");
+  if(!client.connect(host, 80)) Serial.println("Not connected to GIOS host");
   client.print(String("GET ") + url + " HTTP/1.1\r\n" +
              "Host: " + host + "\r\n" +
              "User-Agent: BuildFailureDetectorESP8266\r\n" +
@@ -113,6 +122,7 @@ void getAir(){
     }
   }
   giosInfo = client.readStringUntil('\n');
+  client.stop();
 }
 
 
@@ -136,6 +146,10 @@ void setup() {
   Serial.println(WiFi.localIP()); 
   server.begin();
   dht.begin();
+  if (!bmp.begin()) {  
+   Serial.println("Could not find a valid BMP280 sensor, check wiring!");
+    while (1);
+  }
 }
 
 void loop() {
@@ -168,9 +182,11 @@ void loop() {
              client.print(t);
              client.print("&h=");
              client.print(h);
+             client.print("&p=");
+             client.print(p);
              client.print("&a=");
              getAir();
-             client.print("giosInfo");
+             client.print(giosInfo);
              
              client.println("");         
             } else if(header.indexOf("GET /") >= 0){
@@ -206,5 +222,7 @@ void loop() {
       h = dht.readHumidity();
       Serial.println(t);
       Serial.println(h);
+      p = bmp.readPressure();
+      Serial.println(p);
     }
 }

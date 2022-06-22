@@ -1,0 +1,10 @@
+https://api.gios.gov.pl/pjp-api/rest/station/findAll
+
+
+https://api.gios.gov.pl/pjp-api/rest/station/sensors/{stationId} //Leczkowa: 736
+
+--Sprawdzenie:
+https://powietrze.gios.gov.pl/pjp/current
+
+https://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/736
+pobieramy z niego: stIndexLevel.indexLevelName

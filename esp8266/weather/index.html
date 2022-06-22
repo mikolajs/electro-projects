@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <style media="screen">
+      .aBox {
+         border: solid 2px black; margin: 4%;   text-align: center;
+        vertical-align: middle; display: inline-block; border-radius: 10px; align-items: center;
+      }
+      .c1 {background-color: SlateBlue; width: 40%; height: 100px;}
+      .c2 {background-color: Tomato; width: 40%; height: 100px;}
+      .c3 {background-color: MediumSeaGreen;  width: 90%; min-height: 100px;}
+      .innerText {  position: relative; margin: auto; font-size: 2em; color: white; top: 30%;}
+    </style>
+  </head>
+  <body>
+    <div class="main">
+      <div class="aBox c1">
+        <span class="innerText">Temperatura: </span>
+        <span id="temp" class="innerText">???</span>
+      </div>
+      <div class="aBox c2">
+        <span class="innerText">Wilgotność: </span>
+        <span id="wilg" class="innerText">???</span>
+      </div>
+      <div class="aBox c3">
+        <span class="innerText">Stan powietrza:</span>
+        <span id="pow" class="innerText">???</span>
+
+      </div>
+    </div>
+    <script type="text/javascript">
+      let T;
+      let H;
+      let A;
+      let aInfo;
+      let req = new XMLHttpRequest();
+      req.open('GET', 'http://192.168.0.142/get', true);
+      req.onreadystatechange = addDataAndFindAir;
+      req.send(null);
+      function addDataAndFindAir(e){
+        if (req.readyState == 4) {
+            if(req.status == 200) {
+              let text = req.responseText;
+              console.log(text);
+              text.trim().split('&').forEach((item) => {
+                 let a = item.split('=');
+                 if(a.length > 1 && a[0] == 't') T = a[1];
+                 else if(a.length > 1 && a[0] == 'h') H = a[1];
+                 if(a.length > 1 && a[0] == 'a') A = a[1];
+               });
+               document.getElementById('temp').innerText = T + '°';
+               document.getElementById('wilg').innerText = H + '%';
+               document.getElementById('gios').innerText = A;
+            }
+            else console.log("Błąd podczas ładowania strony");
+        }
+      }
+
+    </script>
+  </body>
+</html>
