@@ -204,7 +204,9 @@ void loop() {
       lastCommand = millis();
       t = dht.readTemperature();
       h = dht.readHumidity();
+      Serial.print("t = ");
       Serial.println(t);
+      Serial.print("h = ");
       Serial.println(h);
     }
 }
