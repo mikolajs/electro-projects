@@ -1,8 +1,8 @@
 #include <OpenTherm.h>
 
 
-const int inPin = 2;
-const int outPin = 3;
+const int inPin = 4;
+const int outPin = 5;
 
 OpenTherm ot(inPin, outPin);
 
@@ -21,10 +21,10 @@ void loop()
    bool enableCentralHeating = true;
    bool enableHotWater = true;
    bool enableCooling = true;
-    //Set/Get Boiler Status
+    //Set/Get Boiler Statushjhjh
     ot.setBoilerStatus(enableCentralHeating, enableHotWater, enableCooling);
     //Set Boiler Temperature to 64 degrees C
-    ot.setBoilerTemperature(64);
+    ot.setBoilerTemperature(36);
     //Get Boiler Temperature
     float temperature = ot.getBoilerTemperature();
     Serial.println(temperature);
