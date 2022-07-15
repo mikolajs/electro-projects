@@ -1,0 +1,5 @@
+Biblioteki do BMP280 z przykładu:
+AsyncDelay
+SoftWire
+BMx280MI
+
