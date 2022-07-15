@@ -5,9 +5,10 @@
 
 const char* ssid     = "sweethome12";
 const char* password = "9A0033D4";
-const char* url = "/temp/1";
+const char* url = "/set/1";
 const char* host = "192.168.0.104:9900";  
 
+const int station = 1;
 const int dhtpin = 2;
 DHT dht(dhtpin, DHT22);
 float t = 0;
@@ -15,29 +16,29 @@ float h = 0;
 int lastCommand = 0;
 
 
-bool sendTemp(){
-  WiFiClient client;
-  //client.setInsecure(); //the magic line, use with caution
-  if(!client.connect(host, 80)) {
-  	Serial.println("Host not found!");
-  	return false;
-  }
-  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-             "Host: " + host + "\r\n" +
-             "User-Agent: termometerPoint1\r\n" +
-             "Connection: close\r\n\r\n");
-  client.print("t=");
-  client.print(t);
-  client.print("&h=");
-  client.print(h);
- while (client.connected()) {
-    String line = client.readStringUntil('\n');
-    if (line == "\r") {
-      Serial.println("Headers received");
-      break;
-    }
-  }
-  return true;
+void sendTemp(){
+  WiFiClient w;
+  HTTPClient client;
+  String address = "http://192.168.0.104:9900/set/";
+  address += station;
+  address += "?t=";
+  address += String(t, 2) + "&h=" + String(h, 2); 
+  client.begin(w, address.c_str());
+  Serial.println(address);
+  Serial.println(t);
+  Serial.println(h);
+  int httpResponseCode =  client.GET();
+  if (httpResponseCode>0) {
+        Serial.print("HTTP Response code: ");
+        Serial.println(httpResponseCode);
+        String payload = client.getString();
+        Serial.println(payload);
+      }
+      else {
+        Serial.print("Error code: ");
+        Serial.println(httpResponseCode);
+      }
+  client.end();
 }
 
 
@@ -64,21 +65,16 @@ void setup() {
 
 void loop() {
   delay(2000);
-   int i = 3;
-   while(i--){
-     delay(200);
-     if(sendTemp()) break;
-     else {
-       Serial.print("Cannot open server");
-       Serial.println();
-     }
-  }
-  delay(100);
-  //Serial.println(millis() - lastCommand);
   if((millis() - lastCommand) >= 2000){
       lastCommand = millis();
       t = dht.readTemperature();
       h = dht.readHumidity();
     }
-    ESP.deepSleep(60000000); 
+  sendTemp();
+  delay(100);
+  //Serial.println(millis() - lastCommand);
+  
+    Serial.println("SLEEP");
+    //ESP.deepSleep(6000000); 
+    Serial.println("AWAKE");
 }
