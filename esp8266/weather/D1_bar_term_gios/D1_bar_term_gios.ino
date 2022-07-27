@@ -2,10 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <DHT.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BMP280.h>
+#include "BMP280lib.h"
 
 
 
@@ -18,11 +15,14 @@ WiFiServer server(80);
 
 
 DHT dht(dhtpin, DHT22);
-Adafruit_BMP280 bmp;
+//D1  i D2
+BMx280SoftWire bmx280(I2C_ADDRESS);
 float t = 0;
 float h = 0;
 float p = 0;
+String a = "brak danych";
 int lastCommand = 0;
+String giosInfoJSON;
 String giosInfo;
 
 
@@ -33,12 +33,13 @@ client.println("<head>");
 client.println("<meta charset='utf-8'>");
 client.println("<style media='screen'>");
 client.println(".aBox {");
-client.println("border: solid 2px black; margin: 4%;   text-align: center;");
+client.println("border: solid 2px black; margin: 4%;   text-align: center; width: 40%;");
 client.println("vertical-align: middle; display: inline-block; border-radius: 10px; align-items: center;");
 client.println("}");
-client.println(".c1 {background-color: SlateBlue; width: 40%; height: 100px;}");
-client.println(".c2 {background-color: Tomato; width: 40%; height: 100px;}");
-client.println(".c3 {background-color: MediumSeaGreen;  width: 90%; min-height: 100px;}");
+client.println(".c1 {background-color: SlateBlue;  height: 100px;}");
+client.println(".c2 {background-color: Tomato; height: 100px;}");
+client.println(".c3 {background-color: MediumSeaGreen; height: 100px;}");
+client.println(".c4 {background-color: Gold; height: 100px;}");
 client.println(".innerText {  position: relative; margin: auto; font-size: 2em; color: white; top: 30%;}");
 client.println("</style>");
 client.println("</head>");
@@ -46,61 +47,68 @@ client.println("<body>");
 client.println("<div class='main'>");
 client.println("<div class='aBox c1'>");
 client.println("<span class='innerText'>Temperatura: </span>");
-client.println("<span id='temp' class='innerText'>???</span>");
+client.print("<span id='temp' class='innerText'>");
+client.print(t);
+client.println("°C</span>");
 client.println("</div>");
 client.println("<div class='aBox c2'>");
 client.println("<span class='innerText'>Wilgotność: </span>");
-client.println("<span id='wilg' class='innerText'>???</span>");
+client.print("<span id='wilg' class='innerText'>");
+client.print(h);
+client.println("%</span>");
 client.println("</div>");
 client.println("<div class='aBox c3'>");
-client.println("<span class='innerText'>Stan powietrza:</span>");
-client.println("<span id='pow' class='innerText'>???</span>");
-client.println("");
+client.println("<span class='innerText'>Ciśnienie: </span>");
+client.print("<span id='cis' class='innerText'>");
+client.print(p);
+client.println("hPa</span>");
 client.println("</div>");
+client.println("<div class='aBox c4'>");
+client.println("<span class='innerText'>Stan powietrza:</span>");
+client.print("<span id='pow' class='innerText'>");
+client.println("</span>");
+client.println("</div>");
+client.println("<textarea id='gios' style='display:none;'>");
+client.println(giosInfoJSON);
+client.println("</textarea>");
 client.println("</div>");
 client.println("<script type='text/javascript'>");
-client.println("let T;");
-client.println("let H;");
-client.println("let A;");
-client.println("let aInfo;");
-client.println("let req = new XMLHttpRequest();");
-client.println("let req2 = new XMLHttpRequest();");
-client.println("req.open('GET', 'http://192.168.0.142/get', true);");
-client.println("req.onreadystatechange = addDataAndFindAir;");
-client.println("req.send(null);");
-client.println("function addDataAndFindAir(e){");
-client.println("if (req.readyState == 4) {");
-client.println("if(req.status == 200) {");
-client.println("let text = req.responseText;");
-client.println("console.log(text);");
-client.println("text.trim().split('&').forEach((item) => {");
-client.println("let a = item.split('=');");
-client.println("if(a.length > 1 && a[0] == 't') T = a[1];");
-client.println("else if(a.length > 1 && a[0] == 'h') H = a[1];");
-client.println("if(a.length > 1 && a[0] == 'a') A = parseInt(a[1]);");
-client.println("});");
-client.println("document.getElementById('temp').innerText = T + '°';");
-client.println("document.getElementById('wilg').innerText = H + '%';");
-client.println("req2.open('GET', 'https://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/'+A, true);");
-client.println("req2.onreadystatechange = findAir;");
-client.println("req2.send(null);");
-client.println("}");
-client.println("else console.log('Błąd podczas ładowania strony');");
-client.println("}");
-client.println("}");
-client.println("function findAir(e){");
-client.println("if (req2.readyState == 4) {");
-client.println("if(req2.status == 200) {");
-client.println("let json = JSON.parse(req2.responseText);");
+client.println("let json = JSON.parse(document.getElementById('gios').value);");
 client.println("console.log(json.stIndexLevel.indexLevelName);");
-client.println("}");
-client.println("else console.log('Błąd podczas ładowania strony');");
-client.println("}");
-client.println("}");
+client.println("document.getElementById('pow').innerHTML = json.stIndexLevel.indexLevelName;");
 client.println("</script>");
 client.println("</body>");
 client.println("</html>");
+}
 
+void getAirDirectly(){
+  const char* url = "/pjp-api/rest/aqindex/getIndex/736";
+  const char* host = "api.gios.gov.pl";   
+  giosInfoJSON = "";  
+  WiFiClient client;
+  //client.setInsecure(); //the magic line, use with caution
+  if(!client.connect(host, 80)) Serial.println("Not connected to GIOS host");
+  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+             "Host: " + host + "\r\n" +
+             "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:99.0) Gecko/20100101 Firefox/99.0\r\n" +
+             "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\r\n" + 
+             "Accept-Language: pl,en-US;q=0.7,en;q=0.3\r\n" +
+             "Connection: keep-alive\r\n\r\n");
+  String headersGIOS = "";
+  bool endHeaders = false;
+ while (client.connected()) {
+    String line = client.readStringUntil('\n');
+    if (line == "\r") {
+      endHeaders = true;
+      Serial.println("Headers received");
+    } else if(endHeaders) {
+      giosInfo = line;
+      break;
+    } else Serial.println(line);
+  }
+  giosInfoJSON  = client.readStringUntil('\n');
+  Serial.println(giosInfoJSON);
+  client.stop();
 }
 
 void getAir(){
@@ -144,12 +152,32 @@ void setup() {
   Serial.println("Connection established!");  
   Serial.print("IP address:\t");
   Serial.println(WiFi.localIP()); 
+  //start server http
   server.begin();
+  //start DHT22
   dht.begin();
-  if (!bmp.begin()) {  
-   Serial.println("Could not find a valid BMP280 sensor, check wiring!");
+  
+  //BMP280 setup
+  sw.setDelay_us(5);
+  sw.setTimeout_ms(100);
+  sw.begin();
+
+  //begin() checks the Interface, reads the sensor ID (to differentiate between BMP280 and BME280)
+  //and reads compensation parameters.
+  if (!bmx280.begin())
+  {
+    Serial.println("begin() failed. check your BMx280 Interface and I2C Address.");
     while (1);
   }
+
+  //reset sensor to default parameters.
+  bmx280.resetToDefaults();
+
+  //by default sensing is disabled and must be enabled by setting a non-zero
+  //oversampling setting.
+  //set an oversampling setting for pressure and temperature measurements. 
+  bmx280.writeOversamplingPressure(BMx280MI::OSRS_P_x16);
+  bmx280.writeOversamplingTemperature(BMx280MI::OSRS_T_x16);
 }
 
 void loop() {
@@ -177,7 +205,7 @@ void loop() {
             client.println();
             
             // turns the GPIOs on and off
-            if (header.indexOf("GET /get") >= 0) {
+           /* if (header.indexOf("GET /get") >= 0) {
              client.print("t=");
              client.print(t);
              client.print("&h=");
@@ -189,9 +217,10 @@ void loop() {
              client.print(giosInfo);
              
              client.println("");         
-            } else if(header.indexOf("GET /") >= 0){
+            } else if(header.indexOf("GET /") >= 0){ */
+              getAirDirectly();
               indexContent(client);
-            }
+           // }
             
             client.println();
             // Break out of the while loop
@@ -211,18 +240,28 @@ void loop() {
     Serial.println("Client disconnected.");
     Serial.println("");
   } else {
-    
+    //Serial.print(".");
   }
-  delay(100);
+  delay(10);
 
   //Serial.println(millis() - lastCommand);
   if((millis() - lastCommand) >= 2000){
       lastCommand = millis();
       t = dht.readTemperature();
       h = dht.readHumidity();
-      Serial.println(t);
-      Serial.println(h);
-      p = bmp.readPressure();
-      Serial.println(p);
+      //Serial.print("temperatura = ");
+      //Serial.println(t);
+      //Serial.print("wilgotność = ");
+      //Serial.println(h);
+      if(bmx280.measure()){
+       int checks = 0;
+       do { delay(50); checks++; if(checks > 10) break; }
+       while(!bmx280.hasValue());
+        p = bmx280.getPressure();
+        p /= 100;
+        //Serial.print("Temperatura BMP280 = "); Serial.println(bmx280.getTemperature());
+      }
+      //Serial.print("ciśnienie =");
+      //Serial.println(p);
     }
 }
