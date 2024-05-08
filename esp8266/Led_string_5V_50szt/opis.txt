@@ -1,0 +1,7 @@
+
+* podłączenie 5V. 
+* JST SM 3-pin - potrzebny pin żeński
+* kostka połączeniowa przewodów
+* kabel obcięty USB
+* ESP8266
+* obudowa kupna

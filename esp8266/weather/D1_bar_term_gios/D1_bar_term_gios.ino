@@ -6,8 +6,8 @@
 
 
 
-const char* ssid     = "sweethome12";
-const char* password = "9A0033D4";
+const char* ssid     = "itechwoman";
+const char* password = "myK0biety";
 
 const int dhtpin = 2;
 

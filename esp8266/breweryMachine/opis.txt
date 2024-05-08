@@ -1,0 +1,4 @@
+* board nie zadziała, brak możliwości podłączenia termometru?
+* termometr dallas
+* relay osobno
+

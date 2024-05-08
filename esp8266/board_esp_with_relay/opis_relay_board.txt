@@ -1,0 +1,8 @@
+* zasilanie 5 do 25V zasilacz?
+* przekaźnik 230V max 10A
+* obudowa kupna
+* The relay is on GPIO4?
+* programowanie? spróbować: 
+ -- podłączyć do 7V zasilania i użyć modułu programatora FDI USB to serial conventer
+## link: https://owenduffy.net/blog/?p=24292
+

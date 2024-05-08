@@ -1,0 +1,5 @@
+* LINK: https://www.instructables.com/Getting-Started-With-ESP32-CAM-Streaming-Video-Usi/
+
+Go to Tools > Board and select ESP32 Wrover Module
+Go to Tools > Port and select the COM port the ESP32 is connected to
+In Tools > Partition Scheme, select “Huge APP (3MB No OTA)“
