@@ -23,15 +23,18 @@
 */
 
 // the setup function runs once when you press reset or power the board
-const int laser = 7;
-const int foto = 11;
+const int laser = 0;
+const int foto = 15;
+const int s = 5;
+const int pinsOut[s] = {0, 1, 2, 3, 4, 5};
 int in = 0;
 void setup() {
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(2, OUTPUT);
-  pinMode(laser, OUTPUT);
-  pinMode(foto, INPUT);
-  Serial.begin(9600);
+  //pinMode(laser, OUTPUT);
+  //pinMode(foto, INPUT);
+  for(int i = 0; i < s; i++) pinMode(pinsOut, OUTPUT)
+  Serial.begin(115200);
 }
 
 // the loop function runs over and over again forever
