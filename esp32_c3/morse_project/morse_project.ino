@@ -1,6 +1,6 @@
 
-int laser = 23;
-int foto = 36;
+int laser = 10;
+int foto = 3;
 int in = false;
 int n = 0;
 void setup() {
@@ -27,6 +27,6 @@ void loop() {
   else digitalWrite(laser, LOW);
   n++;
   
- //Serial.println(n);
+  Serial.println(n);
   delay(1000);
 }

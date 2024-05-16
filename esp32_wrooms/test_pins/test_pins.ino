@@ -22,11 +22,11 @@ void loop() {
   digitalWrite(2, HIGH);  // 
   //digitalWrite(laser, HIGH);
   //in = digitalRead(foto);
-  for(int i = 0; i < s; i++) digitalWrite(pinsOut[i], HIGH);
+  //for(int i = 0; i < s; i++) digitalWrite(pinsOut[i], HIGH);
   delay(1000);                      // wait for a second
   digitalWrite(2, LOW);   
   //digitalWrite(laser, LOW);
-  for(int i = 0; i < s; i++) digitalWrite(pinsOut[i], LOW);
+  //for(int i = 0; i < s; i++) digitalWrite(pinsOut[i], LOW);
   for(int i = 0; i < t; i++) digitalRead(pinsIn[i]);
 	
   delay(1000);   
