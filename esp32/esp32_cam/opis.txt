@@ -3,3 +3,9 @@
 Go to Tools > Board and select ESP32 Wrover Module
 Go to Tools > Port and select the COM port the ESP32 is connected to
 In Tools > Partition Scheme, select “Huge APP (3MB No OTA)“
+
+https://randomnerdtutorials.com/esp32-cam-take-photo-save-microsd-card/
+
+http://192.168.0.210:81/stream
+
+kamera OV2640 o rozdzielczości 2 Mpx. ???

@@ -6,9 +6,9 @@
 const char* ssid     = "sweethome12";
 const char* password = "9A0033D4";
 const int dhtpin = 2;
-const int timeSend = 2000;
+const int timeSend = 180000; //ms
 
-WiFiServer server(80);
+//WiFiServer server(80);
 
 DHT dht(dhtpin, DHT22);
 
@@ -16,12 +16,11 @@ float t = 0;
 float h = 0;
 int lastCommand = 0;
 
-
 void sendTemp(){
   WiFiClient w;
   HTTPClient client;
   
-  String address = "http://192.168.0.104:9900/set/0?t=";
+  String address = "http://192.168.0.120:8989/temp?th=A&T=";
   address += String(t, 2) + "&h=" + String(h, 2); 
   client.begin(w, address.c_str());
 
@@ -42,7 +41,6 @@ void sendTemp(){
   client.end();
 }
 
-
 void setup() {
   Serial.begin(115200);
   WiFi.begin(ssid, password);
@@ -59,7 +57,7 @@ void setup() {
   Serial.println("Connection established!");  
   Serial.print("IP address:\t");
   Serial.println(WiFi.localIP()); 
-  server.begin();
+  //server.begin();
   dht.begin();
 }
 
