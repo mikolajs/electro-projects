@@ -1,14 +1,21 @@
-//sprawdzam klaśnięcie nie działa!!!!!!!!!!!!
-int mic = 36;
+//Najlepiej użyć analogRead. Wyregulować pokrętłem czułość
+// musi być ciągle sprawdzany, żeby trafić na klaśnięcie.!!!!!!
+int mic = 33;
 
 void setup() {
-   Serial.begin(115200);
+  Serial.begin(115200);
   pinMode(mic, INPUT);
 }
-
+int n = 0;
 void loop() {
-   int sound = digitalRead(mic); 
-   if(sound == HIGH) Serial.println("klask");
-   else Serial.println("Nic");
-   delay(100);
+   int sound = analogRead(mic); 
+   //Serial.println(sound);
+   if(sound >  100) {
+   
+    n += 1;
+     Serial.println(String(n) + " klask poziom: " + String(sound));
+     delay(1000);
+   }
+   //else Serial.println("Nic");
+   delay(5);
 }

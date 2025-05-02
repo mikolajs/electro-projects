@@ -2,22 +2,22 @@
 #include <ESP32Servo.h>
 Servo servo;
 
-int pos = 0;
-
+//const float PI = 3.1415;
 void setup() {
-  servo.attach(5);
+  servo.attach(15);
   Serial.begin(115200);
 }
 
 void loop() {
-  for(pos = 0; pos <= 180; pos++){
-    servo.write(pos);
-    delay(10);
+  for(int posDegrees = 0; posDegrees <= 180; posDegrees++) {
+    servo.write(posDegrees);
+    Serial.println(posDegrees);
+    delay(20);
   }
-  for(pos = 180; pos >= 0; pos--){
-    servo.write(pos);
-    delay(10);
+
+  for(int posDegrees = 180; posDegrees >= 0; posDegrees--) {
+    servo.write(posDegrees);
+    Serial.println(posDegrees);
+    delay(20);
   }
-  Serial.println("next");
-  delay(100);
 }
