@@ -212,7 +212,6 @@ void loop() {
               Serial.println("STOP");
               stopAll();
             }
-            
             // Display the HTML web page
             client.println("<!DOCTYPE html><html>");
             client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
@@ -223,20 +222,15 @@ void loop() {
             client.println(".button { background-color: #195B6A; border: none; color: white; padding: 16px 40px;");
             client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}");
             client.println(".button2 {background-color: #77878A;}</style></head>");
-            
             // Web Page Heading
             client.println("<body><h1>ESP8266 Web Server</h1>");
-            
             // Display current state, and ON/OFF buttons for GPIO 5  
             client.println("<p><a href=\"/command/f\"><button class=\"button\">Forward</button></a></p>");
             client.println("<p><a href=\"/command/l\"><button class=\"button\">Left</button></a>");
             client.println("<a href=\"/command/r\"><button class=\"button\">Right</button></a></p>");
             client.println("<p><a href=\"/command/b\"><button class=\"button\">Backward</button></a></p>");
-             
             client.println("<p><a href=\"/command/s\"><button class=\"button\">STOP</button></a></p>");
-           
             client.println("</body></html>");
-            
             // The HTTP response ends with another blank line
             client.println();
             // Break out of the while loop

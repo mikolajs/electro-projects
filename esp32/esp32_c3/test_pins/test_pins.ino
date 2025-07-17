@@ -2,7 +2,7 @@
 //przy podłączaniu kabla wcisnąć boot i dopier puścić. (z lewej)
 ///uruchomienie wymaga klinięcia resetu (z prawej)
 int n = 1;
-const int s = 8; //buildin led
+const int s = 13; //buildin led
 const int pinsOut[s] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 21};
 //5? za małe napięcie?
 // 1, 6, 7, 8,  9, 10, 11, uszkodzone?  34, 35, 36, 39 only input
