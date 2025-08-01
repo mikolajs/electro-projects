@@ -1,21 +1,14 @@
+///ESP32 Mini
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include <NTPClient.h>
-#include <WiFiUdp.h>
 #define POMP1 1
-#define POMP1_TIME 5000
+#define POMP1_TIME 4000
 #define POMP2 2
-#define POMP2_TIME 5000
+#define POMP2_TIME 4000
 //in seconds!!!!
-#define HOUR 1
-///000000
-unsigned long lastWaterTime = 0;
-unsigned long aTime = 0;
-const long WATER_TIME = 48;
+#define HOUR 3600
 const char* ssid = "sweethome12";
 const char* password = "9A0033D4";
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP);
 
 void setup() {
   Serial.begin(115200);
@@ -29,17 +22,9 @@ void setup() {
   }
   Serial.println("");
   Serial.println("WiFi connected");
-  timeClient.begin();
-  timeClient.update();
-  lastWaterTime = timeClient.getEpochTime();
 }
 
-void hoursPeriod(){
-  timeClient.update();
-  aTime = timeClient.getEpochTime();
-}
 void mkWater(){
-  Serial.println(lastWaterTime);
   Serial.println("Water");
   digitalWrite(POMP1, HIGH);
   delay(POMP1_TIME);
@@ -47,18 +32,54 @@ void mkWater(){
   digitalWrite(POMP2, HIGH);
   delay(POMP2_TIME);
   digitalWrite(POMP2, LOW);
-
+  
+  
+  if(WiFi.status()== WL_CONNECTED){
+    WiFiClient wifi;
+    HTTPClient http;
+    String serverPath =  "http://192.168.0.120:8989/setWateringInfo?d=dom";
+    http.begin(wifi, serverPath.c_str());
+    Serial.println(serverPath);
+    int httpResCode = http.GET();
+    if(httpResCode == 200) Serial.println("Set info OK");
+    else {
+      Serial.print("Error set info code: ");
+      Serial.println(String(httpResCode));
+    }
+    http.end();
+ }
 }
+
 void loop() {
   delay(10000);
-  hoursPeriod();
-  Serial.print("get time: ");
-  Serial.println(aTime);
-  unsigned long period = aTime - lastWaterTime;
-  if(period >= HOUR*WATER_TIME) {
-    mkWater();
-    lastWaterTime = aTime;
+  //Serial.print(period);
+  //Serial.print()
+
+  if(WiFi.status()== WL_CONNECTED){
+    WiFiClient wifi;
+    HTTPClient http;
+    String serverPath =  "http://192.168.0.120:8989/canWatering?d=dom";
+    http.begin(wifi, serverPath.c_str());
+    Serial.println(serverPath);
+    int httpResCode = http.GET();
+    if(httpResCode == 200) {
+      Serial.println("Watering time now");
+      http.end();
+      mkWater();
+    }
+    else {
+      Serial.print("No watering time code: ");
+      Serial.println(String(httpResCode));
+      http.end();
+    }
+    delay(HOUR*1000);
+  } else {
+    delay(1000);
+    WiFi.reconnect();
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      Serial.print(".");
+    }
   }
-  delay(100);
-  //delay(HOUR);
+  //delay(1000);
 }

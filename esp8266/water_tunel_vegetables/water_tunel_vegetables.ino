@@ -15,7 +15,7 @@ WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
 
 void mkWater() {
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 4; i++) {
     digitalWrite(POMP1, HIGH);
     delay(POMP1_TIME);
     //aTime += 2*POMP1_TIME;
@@ -40,7 +40,7 @@ void setup() {
   timeClient.update();
   int h = timeClient.getHours();
   Serial.println(h);
-  if (h >= 20) mkWater();
+  if (h > 21) mkWater();
   digitalWrite(POMP1, LOW);
   ESP.deepSleep(30e6);
 }

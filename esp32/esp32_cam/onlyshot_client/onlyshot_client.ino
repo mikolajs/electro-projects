@@ -1,3 +1,4 @@
+//AI Thinker ESP32-CAM + standard Camera 
 #include "esp_camera.h"
 #include "esp_timer.h"
 #include <WiFi.h>
@@ -89,7 +90,7 @@ unsigned long currentTime = 0;
 unsigned long previousTime = 0;
 const long timeoutTime = 2000;
 String header;
-String address = "http://192.168.0.218:8989/setImage?name=back1";
+String address = "http://192.168.0.218:8989/setImage?name=esp32s3";
 
 void sendFoto(){
    HTTPClient client;
@@ -109,10 +110,10 @@ void sendFoto(){
     Serial.println(fb->len); 
     //return the frame buffer back to the driver for reuse
     client.addHeader("Content-Type", "image/jpeg");
-    client.addHeader("Content-Disposition", "form-data;filename=shot.jpg");
+    //client.addHeader("Content-Disposition", "form-data;filename=shot.jpg");
     client.addHeader("Content-Length",  String(fb->len));
     int httpResponse = client.POST(fb->buf, fb->len);
-    delay(200);
+    delay(20);
     esp_camera_fb_return(fb);
     Serial.print("Response code: ");
     Serial.println(httpResponse);
