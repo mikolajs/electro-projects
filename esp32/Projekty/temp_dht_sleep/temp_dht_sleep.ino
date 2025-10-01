@@ -1,4 +1,4 @@
-/* ESP32 C3 Super Mini MakerGO 
+/* ESP32 C3 Super Mini MakerGO // napięcie 5V!
 Przed wgraniem wcisnąć boot i dopiero podłączyć kabel do komputera
 */
 #define uS_TO_S_FACTOR 1000000ULL  /* Conversion factor for micro seconds to seconds */
@@ -14,7 +14,6 @@ void connectWifi(){
   WiFi.mode(WIFI_STA);
   WiFi.begin("sweethome12", "9A0033D4");
   Serial.print("Connecting to ");
-  Serial.println("sweethome12");
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");

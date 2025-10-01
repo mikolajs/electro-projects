@@ -80,15 +80,15 @@ void setup() {
 
 void loop() {
   connectWifi();
-  SMO = analogRead(analogPin);
+  //SMO = analogRead(analogPin);
   //valueMap = map(valueAnalog, 0, 1023, 0, 100);
-  String info = "MQ2 read: " + String(valueAnalog);
-  if(valueAnalog > 1100){
-    Serial.print(info);
-    Serial.println(" Wykryto gaz lub CO");
-  } else {
-    Serial.println(info);
-  }
+  // String info = "MQ2 read: " + String(valueAnalog);
+  // if(valueAnalog > 1100){
+  //   Serial.print(info);
+  //   Serial.println(" Wykryto gaz lub CO");
+  // } else {
+  //   Serial.println(info);
+  // }
   measure();
   sendData(TEM, HUM, SMO);
   delay(180000);

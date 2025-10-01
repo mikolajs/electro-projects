@@ -2,7 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #define POMP1 0 ///newer use pin 2!!!
-#define POMP1_TIME 7000
+#define POMP1_TIME 5000
 
 //in seconds!!!!
 #define HOUR 3600
@@ -11,7 +11,7 @@ const char* password = "9A0033D4";
 void setup() {
   Serial.begin(115200);
   pinMode(POMP1, OUTPUT);
-  
+  digitalWrite(POMP1, LOW);
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);

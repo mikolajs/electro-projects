@@ -14,6 +14,7 @@ RETURN_WATER_TEMP to temperatura po ogrzaniu wracająca z obiegu. Ta interesuje 
 float CH_SETPOINT = 30.0f;
 static OpenTherm ot(4, 5);
 uint waitingTime = 0;
+const int step = 5000;
 
  void connectWifi(){
   WiFi.mode(WIFI_STA);
@@ -194,16 +195,16 @@ void setBoilerInfo(){
 void loop() {
 
   showStatus();
-  delay(3000);
+  delay(step);
   //getTemperature();
   runSet();
-  waitingTime += 3000;
+  waitingTime += step;
   if(waitingTime > WAIT){
     getTemperature();
     setBoilerInfo();
     waitingTime = 0;
   }
-  delay(3000);
-  waitingTime += 3000;
+  delay(step);
+  waitingTime += step;
   //test(); 
 }

@@ -16,6 +16,7 @@
 
 #include "esp_camera.h"
 #include <WiFi.h>
+#include <EEPROM.h>
 #include "esp_timer.h"
 #include "img_converters.h"
 #include "Arduino.h"
@@ -26,7 +27,6 @@
 
 //Replace with your network credentials
 const char* ssid = "sweethome12";
-const char* password = "9A0033D4";
 
 #define PART_BOUNDARY "123456789000000000000987654321"
 
@@ -251,8 +251,14 @@ void setup() {
     Serial.printf("Camera init failed with error 0x%x", err);
     return;
   }
+  //read password from eeprom
+  const int pass_len = 0;
+  EEPROM.begin(pass_len);
+  String pass;
+  for(int i = 0; i < pass_len; i++) pass += (char)(EEPROM.read(i));
+  
   // Wi-Fi connection
-  WiFi.begin(ssid, password);
+  WiFi.begin(ssid, pass.c_str());
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");

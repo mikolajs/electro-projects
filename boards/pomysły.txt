@@ -1,0 +1,9 @@
+# DLA MAŁYCH DZIECI APPKA NA ANDROIDA
+
+* sterowanie przechyleniem telefonu
+* ruch pod wpływem dźwięku
+* miganie światłem, włączenie i wyłączanie
+ruch za światłem
+* dźwięk na telefonie z odległości Ultradźwięków (organy – wysokość dźwięku zależna od odczytanej odleglości)
+
+
