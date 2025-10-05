@@ -5,7 +5,7 @@
 #include <DHT.h>
 //create an BMx280 object using the SoftWire Interface
 BMx280SoftWire bmx280(I2C_ADDRESS);
-String serverName = "http://192.168.0.120:8989/set-temperature";
+String serverName = "http://192.168.0.120:8989/measures/?th=green_bmx";
 
 double pressure = 0.0;
 double tempBmx = 0.0;
@@ -77,31 +77,24 @@ bool measures(){
 }
 
 void loop() {
+
   if(WiFi.status()== WL_CONNECTED){
       WiFiClient client;
       HTTPClient http;
       measures();
       String serverPath = serverName;
-      String json = "{ \"station\":\"withBmx\", \"data\":{";
-      json += "\"temperatureBmx\":";
-      json += String(tempBmx, 2);
-      json +=  ", "; 
-      json += "\"temperatureDht\":";
-      json +=  String(tempDht,2);
-      json += ", ";
-      json +=  "\"pressureBmx\":";
-      json += String(pressure, 2);
-      json += ", ";
-      json += "\"humidityDht\":";
-      json += String(humidityDht, 2);
-      json += "}}\n";
-      //serverPath += json;
+      float avgT = (tempBmx + tempDht)/2.0;
+      serverPath += "&T=";
+      serverPath += String(T, 2);
+      serverPath += "&h=";
+      serverPath += String(humidityDht, 2);
+      serverPath += "&p=";
 
       http.begin(client, serverPath.c_str());
       Serial.println(serverPath);
-      http.addHeader("Content-Type", "application/json");
+      //http.addHeader("Content-Type", "application/json");
       //Serial.println(json);
-      int httpResponseCode = http.POST(json);
+      int httpResponseCode = http.GET();
       
       if (httpResponseCode>0) {
         Serial.print("HTTP Response code: ");
@@ -115,13 +108,12 @@ void loop() {
       }
       // Free resources
       http.end();
-      delay(100000);
     }
     else {
       Serial.println("WiFi Disconnected");
       connectWifi();
     }
   
-  delay(20000);
+  delay(180000);
 
 }

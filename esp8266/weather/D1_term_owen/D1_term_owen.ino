@@ -20,7 +20,7 @@ void sendTemp(){
   WiFiClient w;
   HTTPClient client;
   
-  String address = "http://192.168.0.120:8989/temp?th=A&T=";
+  String address = "http://192.168.0.120:8989/sensor?th=A&T=";
   address += String(t, 2) + "&h=" + String(h, 2); 
   client.begin(w, address.c_str());
 
@@ -62,7 +62,7 @@ void setup() {
 }
 
 void loop() {
-  delay(100);
+  delay(1000);
   //Serial.println(millis() - lastCommand);
   if((millis() - lastCommand) >= timeSend){
       lastCommand = millis();

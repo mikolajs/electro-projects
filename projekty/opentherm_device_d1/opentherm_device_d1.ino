@@ -12,6 +12,7 @@ RETURN_WATER_TEMP to temperatura po ogrzaniu wracająca z obiegu. Ta interesuje 
 */
 
 float CH_SETPOINT = 30.0f;
+//podłączenie kabli: czerwony -    , zielony -
 static OpenTherm ot(4, 5);
 uint waitingTime = 0;
 const int step = 5000;

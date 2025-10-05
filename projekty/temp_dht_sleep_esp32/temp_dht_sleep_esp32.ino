@@ -28,7 +28,7 @@ void sendData(double t, double h){
   if(WiFi.status()== WL_CONNECTED){
       WiFiClient wifi;
       HTTPClient http;
-      String serverPath =  "http://192.168.0.120:8989/sensor?th=czerwony&T=";
+      String serverPath =  "http://192.168.0.120:8989/measures?th=czerwony&T=";
       serverPath += String(t,2);
       serverPath += "&h=";
       serverPath += String(h, 2);
