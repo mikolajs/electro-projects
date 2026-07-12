@@ -9,8 +9,8 @@
   "author": "Mikołaj Sochacki",
   "license": "LGPL",
   "dependencies": {
-    "express": "~4.12.4",
-    "body-parser": "~1.12.4",
-    "sqlite3": "~3.0.8"
+    "body-parser": "^2.2.0",
+    "express": "^5.1.0",
+    "pg": "^8.16.3"
   }
 }

@@ -1,4 +1,6 @@
-//PIR MINI left Power 5V or 3.3V, right GND, center digital pin
+//PIR MINI left Power 5V or 3.3V, right GND, center digital pin 
+/// TYLKO 2 metry
+//Duży PIR góra lewa GND góra prawa 3.3V center Sensor pin, regulacja prawy czas, lewy środek odległość.
 
 int SENSOR_PIN = 16;
 int LED = 5;

@@ -28,7 +28,7 @@ void sendData(double t, double h){
   if(WiFi.status()== WL_CONNECTED){
       WiFiClient wifi;
       HTTPClient http;
-      String serverPath =  "http://192.168.0.120:8989/measures?th=czerwony&T=";
+      String serverPath =  "http://192.168.0.120:8989/measures?th=white_black&T=";
       serverPath += String(t,2);
       serverPath += "&h=";
       serverPath += String(h, 2);
@@ -131,6 +131,6 @@ void setup(){
 
 void loop(){
   //This is not going to be called
-  
+
 }
 

@@ -16,13 +16,13 @@
 //#define CAMERA_MODEL_M5STACK_V2_PSRAM // M5Camera version B Has PSRAM
 //#define CAMERA_MODEL_M5STACK_WIDE // Has PSRAM
 //#define CAMERA_MODEL_M5STACK_ESP32CAM // No PSRAM
-#define CAMERA_MODEL_AI_THINKER // Has PSRAM
+#define CAMERA_MODEL_AI_THINKER  // Has PSRAM
 //#define CAMERA_MODEL_TTGO_T_JOURNAL // No PSRAM
 
 #include "camera_pins.h"
 
-const char* ssid = "sweethome12";
-const char* password = "9A0033D4";
+const char *ssid = "sweethome12";
+const char *password = "9A0033D4";
 
 
 void setup() {
@@ -51,10 +51,10 @@ void setup() {
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
-  
+
   // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
   //                      for larger pre-allocated frame buffer.
-  if(psramFound()){
+  if (psramFound()) {
     config.frame_size = FRAMESIZE_UXGA;
     config.jpeg_quality = 10;
     config.fb_count = 2;
@@ -76,12 +76,12 @@ void setup() {
     return;
   }
 
-  sensor_t * s = esp_camera_sensor_get();
+  sensor_t *s = esp_camera_sensor_get();
   // initial sensors are flipped vertically and colors are a bit saturated
   if (s->id.PID == OV3660_PID) {
-    s->set_vflip(s, 1); // flip it back
-    s->set_brightness(s, 1); // up the brightness just a bit
-    s->set_saturation(s, -2); // lower the saturation
+    s->set_vflip(s, 1);        // flip it back
+    s->set_brightness(s, 1);   // up the brightness just a bit
+    s->set_saturation(s, -2);  // lower the saturation
   }
   // drop down frame size for higher initial frame rate
   s->set_framesize(s, FRAMESIZE_QVGA);
@@ -105,78 +105,78 @@ void setup() {
   Serial.println("' to connect");
 }
 
-esp_err_t camera_capture(){
-    //acquire a frame
-    camera_fb_t * fb = esp_camera_fb_get();
-    if (!fb) {
-        ESP_LOGE(TAG, "Camera Capture Failed");
-        return ESP_FAIL;
-    }
-    //replace this with your own function
-    //process_image(fb->width, fb->height, fb->format, fb->buf, fb->len);
-    Serial.print(fb->width);
-    Serial.print("x");
-    Serial.print(fb->height);
-    Serial.print(" len: ");
-    Serial.println(fb->len); 
-    //return the frame buffer back to the driver for reuse
-    esp_camera_fb_return(fb);
-    return ESP_OK;
+esp_err_t camera_capture() {
+  //acquire a frame
+  camera_fb_t *fb = esp_camera_fb_get();
+  if (!fb) {
+    ESP_LOGE(TAG, "Camera Capture Failed");
+    return ESP_FAIL;
+  }
+  //replace this with your own function
+  //process_image(fb->width, fb->height, fb->format, fb->buf, fb->len);
+  Serial.print(fb->width);
+  Serial.print("x");
+  Serial.print(fb->height);
+  Serial.print(" len: ");
+  Serial.println(fb->len);
+  //return the frame buffer back to the driver for reuse
+  esp_camera_fb_return(fb);
+  return ESP_OK;
 }
 
 typedef struct {
-        httpd_req_t *req;
-        size_t len;
+  httpd_req_t *req;
+  size_t len;
 } jpg_chunking_t;
 
-static size_t jpg_encode_stream(void * arg, size_t index, const void* data, size_t len){
-    jpg_chunking_t *j = (jpg_chunking_t *)arg;
-    if(!index){
-        j->len = 0;
-    }
-    if(httpd_resp_send_chunk(j->req, (const char *)data, len) != ESP_OK){
-        return 0;
-    }
-    j->len += len;
-    return len;
+static size_t jpg_encode_stream(void *arg, size_t index, const void *data, size_t len) {
+  jpg_chunking_t *j = (jpg_chunking_t *)arg;
+  if (!index) {
+    j->len = 0;
+  }
+  if (httpd_resp_send_chunk(j->req, (const char *)data, len) != ESP_OK) {
+    return 0;
+  }
+  j->len += len;
+  return len;
 }
 
-esp_err_t jpg_httpd_handler(httpd_req_t *req){
-    camera_fb_t * fb = NULL;
-    esp_err_t res = ESP_OK;
-    size_t fb_len = 0;
-    int64_t fr_start = esp_timer_get_time();
+esp_err_t jpg_httpd_handler(httpd_req_t *req) {
+  camera_fb_t *fb = NULL;
+  esp_err_t res = ESP_OK;
+  size_t fb_len = 0;
+  int64_t fr_start = esp_timer_get_time();
 
-    fb = esp_camera_fb_get();
-    if (!fb) {
-        ESP_LOGE(TAG, "Camera capture failed");
-        httpd_resp_send_500(req);
-        return ESP_FAIL;
-    }
-    res = httpd_resp_set_type(req, "image/jpeg");
-    if(res == ESP_OK){
-        res = httpd_resp_set_hdr(req, "Content-Disposition", "inline; filename=capture.jpg");
-    }
+  fb = esp_camera_fb_get();
+  if (!fb) {
+    ESP_LOGE(TAG, "Camera capture failed");
+    httpd_resp_send_500(req);
+    return ESP_FAIL;
+  }
+  res = httpd_resp_set_type(req, "image/jpeg");
+  if (res == ESP_OK) {
+    res = httpd_resp_set_hdr(req, "Content-Disposition", "inline; filename=capture.jpg");
+  }
 
-    if(res == ESP_OK){
-        if(fb->format == PIXFORMAT_JPEG){
-            fb_len = fb->len;
-            res = httpd_resp_send(req, (const char *)fb->buf, fb->len);
-        } else {
-            jpg_chunking_t jchunk = {req, 0};
-            res = frame2jpg_cb(fb, 80, jpg_encode_stream, &jchunk)?ESP_OK:ESP_FAIL;
-            httpd_resp_send_chunk(req, NULL, 0);
-            fb_len = jchunk.len;
-        }
+  if (res == ESP_OK) {
+    if (fb->format == PIXFORMAT_JPEG) {
+      fb_len = fb->len;
+      res = httpd_resp_send(req, (const char *)fb->buf, fb->len);
+    } else {
+      jpg_chunking_t jchunk = { req, 0 };
+      res = frame2jpg_cb(fb, 80, jpg_encode_stream, &jchunk) ? ESP_OK : ESP_FAIL;
+      httpd_resp_send_chunk(req, NULL, 0);
+      fb_len = jchunk.len;
     }
-    esp_camera_fb_return(fb);
-    int64_t fr_end = esp_timer_get_time();
-    ESP_LOGI(TAG, "JPG: %uKB %ums", (uint32_t)(fb_len/1024), (uint32_t)((fr_end - fr_start)/1000));
-    return res;
+  }
+  esp_camera_fb_return(fb);
+  int64_t fr_end = esp_timer_get_time();
+  ESP_LOGI(TAG, "JPG: %uKB %ums", (uint32_t)(fb_len / 1024), (uint32_t)((fr_end - fr_start) / 1000));
+  return res;
 }
 
 
-void loop(){
+void loop() {
   camera_capture();
   delay(10000);
 }

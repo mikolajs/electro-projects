@@ -27,14 +27,15 @@
 
 //Replace with your network credentials
 const char* ssid = "sweethome12";
+const char *password = "9A0033D4";
 
 #define PART_BOUNDARY "123456789000000000000987654321"
 
 // This project was tested with the AI Thinker Model, M5STACK PSRAM Model and M5STACK WITHOUT PSRAM
-#define CAMERA_MODEL_AI_THINKER
+// #define CAMERA_MODEL_AI_THINKER
 //#define CAMERA_MODEL_M5STACK_PSRAM
 //#define CAMERA_MODEL_M5STACK_WITHOUT_PSRAM
-
+#define CAMERA_MODEL_XIAO_ESP32S3 // Has PSRAM
 // Not tested with this model
 //#define CAMERA_MODEL_WROVER_KIT
 
@@ -113,6 +114,24 @@ const char* ssid = "sweethome12";
   #define VSYNC_GPIO_NUM    25
   #define HREF_GPIO_NUM     23
   #define PCLK_GPIO_NUM     22
+#elif defined(CAMERA_MODEL_XIAO_ESP32S3)
+#define PWDN_GPIO_NUM  -1
+#define RESET_GPIO_NUM -1
+#define XCLK_GPIO_NUM  10
+#define SIOD_GPIO_NUM  40
+#define SIOC_GPIO_NUM  39
+
+#define Y9_GPIO_NUM    48
+#define Y8_GPIO_NUM    11
+#define Y7_GPIO_NUM    12
+#define Y6_GPIO_NUM    14
+#define Y5_GPIO_NUM    16
+#define Y4_GPIO_NUM    18
+#define Y3_GPIO_NUM    17
+#define Y2_GPIO_NUM    15
+#define VSYNC_GPIO_NUM 38
+#define HREF_GPIO_NUM  47
+#define PCLK_GPIO_NUM  13
 #else
   #error "Camera model not selected"
 #endif
@@ -235,10 +254,12 @@ void setup() {
   
   if(psramFound()){
     //config.frame_size = FRAMESIZE_UXGA;
+    //Serial.print("Has PSRAM");
     config.frame_size = FRAMESIZE_XGA;
     config.jpeg_quality = 10;
     config.fb_count = 2;
   } else {
+    //Serial.print("Hasn't PSRAM");
     config.frame_size = FRAMESIZE_SVGA;
     config.jpeg_quality = 12;
     config.fb_count = 1;
@@ -252,13 +273,14 @@ void setup() {
     return;
   }
   //read password from eeprom
-  const int pass_len = 0;
-  EEPROM.begin(pass_len);
-  String pass;
-  for(int i = 0; i < pass_len; i++) pass += (char)(EEPROM.read(i));
-  
+  // const int pass_len = 0;
+  // EEPROM.begin(pass_len);
+  // String pass;
+  // for(int i = 0; i < pass_len; i++) pass += (char)(EEPROM.read(i));
+  // Serial.print(pass);
   // Wi-Fi connection
-  WiFi.begin(ssid, pass.c_str());
+  // WiFi.begin(ssid, pass.c_str());
+  WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
@@ -268,7 +290,8 @@ void setup() {
   
   Serial.print("Camera Stream Ready! Go to: http://");
   Serial.print(WiFi.localIP());
-  
+  //Serial.printf("PSRAM size: %d\n", ESP.getPsramSize());
+ // Serial.printf("PSRAM free: %d\n", ESP.getFreePsram());
   // Start streaming web server
   startCameraServer();
 }

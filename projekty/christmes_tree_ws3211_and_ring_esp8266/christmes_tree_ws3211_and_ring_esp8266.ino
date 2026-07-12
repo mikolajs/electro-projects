@@ -1,13 +1,18 @@
-#include <FastLED.h>
+#include <FastLED.h> //fastLED lib
 #define LED_PIN 5    // Replace with the pin number you used for DATA connection
 #define NUM_LEDS 50  // Replace with the number of LEDs in your strip
 #define DELAY_TIME 20  // Delay between LED movements (in milliseconds)
 
-#include <Adafruit_NeoPixel.h>
+#include <ESP8266WiFi.h> 
+#include <ESP8266HTTPClient.h>
+
+#include <Adafruit_NeoPixel.h> //Adafruint NEOPIXEL lib
 #define PIN            15
 #define NUMPIXELS      16
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN,
 NEO_GRB + NEO_KHZ800);
+
+bool PLAY = true;
 
 CRGB leds[NUM_LEDS];
 int animation = 0;
@@ -227,12 +232,64 @@ void off() {
   }
 }
 
+void connectWifi(){
+  WiFi.mode(WIFI_STA);
+  WiFi.begin("sweethome12", "9A0033D4");
+  Serial.print("Connecting to ");
+  Serial.println("sweethome12");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("WiFi connected.");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
+void checkIfWork(){
+  if(WiFi.status()== WL_CONNECTED){
+      WiFiClient wifi;
+      HTTPClient http;
+      String serverPath =  "http://192.168.0.120:8989/getChristmasTreeState";
+	//wgrać do kontrolera!!!
+      http.begin(wifi, serverPath.c_str());
+      Serial.println(serverPath);
+      //Serial.println(json);
+      int httpResponseCode = http.GET();
+
+      if (httpResponseCode>0) {
+        Serial.print("HTTP Response code: ");
+        Serial.println(httpResponseCode);
+        String payload = http.getString();
+        Serial.println(payload);
+        int doPlay = payload.toInt();
+        if(doPlay == 1) PLAY = true; else PLAY = false;
+      } else {
+        Serial.print("Error code: ");
+        Serial.println(httpResponseCode);
+      }
+      // Free resources
+      http.end();
+      //opdelay(1000);
+    } else {
+      Serial.println("WiFi Disconnected");
+      connectWifi();
+    }
+
+}
+
+
 void setup() {
   FastLED.addLeds<WS2811, LED_PIN, RGB>(leds, NUM_LEDS);
    pixels.begin();
   randomSeed(analogRead(0));
+  Serial.begin(115200);
+  connectWifi();
 }
 void loop() {
+  checkIfWork();
+  if(PLAY){
   // Turn off all LEDs
   switch(animation){
     case 0:
@@ -308,5 +365,8 @@ void loop() {
   }
      // Delay between LED movements
    delay(DELAY_TIME);
+  } else {
+    delay(20000);
+  }
 
 }

@@ -1,0 +1,8 @@
+Fizyka z ESP32
+
+#1 Rurka z owiniętą zwojnicą. Pomiar indukcji pola magnetycznego spadającego magnesu.
+#2 Zwojnice do badania prawa Faradaya
+#3 Pomiar spadku swobodnego. Rurka z laserami i fotodiodą w której spada kulka
+#4 Badanie laserem i fotodiodą wahadła matematycznego
+#5 Badanie ruchu po okręgu dzięki laserowi i czujnikom osadzonym na kręcącym się kole
+#6 Waga skręcień, waga, siłomierz???

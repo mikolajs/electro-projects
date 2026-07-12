@@ -4,8 +4,9 @@
 #include <WiFiClient.h>
 #include <DHT.h>
 //create an BMx280 object using the SoftWire Interface
+//pins d2 i d1 (GPIO4 niebieski i GPIO5 zielony)
 BMx280SoftWire bmx280(I2C_ADDRESS);
-String serverName = "http://192.168.0.120:8989/measures/?th=green_bmx";
+String serverName = "http://192.168.0.120:8989/measures?th=green_bmx";
 
 double pressure = 0.0;
 double tempBmx = 0.0;
@@ -85,11 +86,11 @@ void loop() {
       String serverPath = serverName;
       float avgT = (tempBmx + tempDht)/2.0;
       serverPath += "&T=";
-      serverPath += String(T, 2);
+      serverPath += String(avgT, 2);
       serverPath += "&h=";
       serverPath += String(humidityDht, 2);
       serverPath += "&p=";
-
+      serverPath += String(pressure, 2);
       http.begin(client, serverPath.c_str());
       Serial.println(serverPath);
       //http.addHeader("Content-Type", "application/json");

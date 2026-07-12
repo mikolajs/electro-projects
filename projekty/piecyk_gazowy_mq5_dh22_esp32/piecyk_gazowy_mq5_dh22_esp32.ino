@@ -23,6 +23,7 @@ bool measure(){
 }
 
 void connectWifi(){
+  if(WiFi.status() == WL_CONNECTED) return;
   WiFi.mode(WIFI_STA);
   WiFi.begin("sweethome12", "9A0033D4");
   Serial.print("Connecting to ");
@@ -89,7 +90,7 @@ void loop() {
   // } else {
   //   Serial.println(info);
   // }
-  measure();
+  if(!measure()) ESP.restart();
   sendData(TEM, HUM, SMO);
   delay(180000);
 }

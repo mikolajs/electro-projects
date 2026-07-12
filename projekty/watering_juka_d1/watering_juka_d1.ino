@@ -1,6 +1,9 @@
 //ESP8266
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
+//esp32-wroom-da module
+// #include <WiFi.h>
+// #include <HTTPClient.h>
 #define POMP1 0 ///newer use pin 2!!!
 #define POMP1_TIME 5000
 
@@ -23,11 +26,12 @@ void setup() {
 
 void mkWater(){
   Serial.println("Water");
-  
-  digitalWrite(POMP1, HIGH);
-  delay(POMP1_TIME);
-  digitalWrite(POMP1, LOW);
-  delay(POMP1_TIME);
+  for(int i = 0; i < 3; i++){
+    digitalWrite(POMP1, HIGH);
+    delay(POMP1_TIME);
+    digitalWrite(POMP1, LOW);
+    delay(POMP1_TIME);
+  }
   
   if(WiFi.status()== WL_CONNECTED){
     WiFiClient wifi;

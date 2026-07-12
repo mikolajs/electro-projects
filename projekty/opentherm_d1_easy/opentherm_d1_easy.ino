@@ -1,6 +1,6 @@
 #include <EasyOpenTherm.h>
 #define uS_TO_S_FACTOR 1000000ULL  /* Conversion factor for micro seconds to seconds */
-#define WAIT  180000        /* Time ESP32 will go to sleep (in miliseconds) */
+#define WAIT  180000 /*in miliseconds*/        
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 
@@ -13,9 +13,12 @@ RETURN_WATER_TEMP to temperatura po ogrzaniu wracająca z obiegu. Ta interesuje 
 
 float CH_SETPOINT = 30.0f;
 //podłączenie kabli: czerwony -    , zielony -
-static OpenTherm ot(4, 5);
-uint waitingTime = 0;
-const int step = 5000;
+static OpenTherm ot(4, 5);  // (2, 3)??
+uint32_t currentTime = 0;
+uint32_t previousTime = 0;
+uint32_t timePass = 0;
+uint32_t sendDataTime = 0;
+int step = 0;
 
  void connectWifi(){
   WiFi.mode(WIFI_STA);
@@ -33,11 +36,11 @@ const int step = 5000;
 }
 
 void showStatus(){
-  //uint8_t primaryFlags = uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_CH_ENABLE);
-  uint8_t primaryFlags = uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_DHW_ENABLE) | uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_CH_ENABLE) | uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_COOLING_ENABLE) | uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_OTC_ENABLE);
-  //primaryFlags != uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_CH2_ENABLE);
+  uint8_t primaryFlags = uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_CH_ENABLE);
+  //uint8_t primaryFlags = uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_DHW_ENABLE); | uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_CH_ENABLE) | uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_COOLING_ENABLE) | uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_OTC_ENABLE);
+  primaryFlags |= uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_CH2_ENABLE);
   //primaryFlags |=  uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_OTC_ENABLE);
-  //primaryFlags |=  uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_DHW_ENABLE);  // Enable Domestic Hot Water 
+  primaryFlags |=  uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_DHW_ENABLE);  // Enable Domestic Hot Water 
   //primaryFlags |= uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_COOLING_ENABLE);     // Enable cooling (of your boiler, if available) 
   // Send primaryFlags to the boiler to request services. Receive statusFlags from the boiler to see if it is in fault status, if it is in central heating status or domestic hot water, if it's flame is burning, etc.
   Serial.println("Request services from the boiler and check it's status...");
@@ -48,17 +51,10 @@ void showStatus(){
     if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_CH_ENABLE)) Serial.println("CH ENABLED");
     if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_DHW_ENABLE)) Serial.println("HOT WATER DHW ENABLED");
     if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_CH2_ENABLE)) Serial.println("CH2 ENABLED");
-      // Show the meaning of each bit in the statusFlags received from the boiler
-   //if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::SECONDARY_FAULT_INDICATION)) Serial.println("FAULT NOTIFICATION");
-    //if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::SECONDARY_CH_MODE)) Serial.println("Central Heating (CH) MODE");
-    //if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::SECONDARY_DHW_MODE)) Serial.println("Domestc Hot Water (DHW) MODE");
-    //if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::SECONDARY_FLAME_STATUS)) Serial.println("Flame is on");
-    //if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::SECONDARY_COOLING_STATUS)) Serial.println("Cooling");
-    //if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::SECONDARY_CH2_MODE)) Serial.println("Second Central Heating system (CH2) is active");
-    //if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::SECONDARY_DIAGNOSTIC_IND)) Serial.println("DIAGNOSTICS INDICATION");
   } else {
     Serial.println("Failed to get status");
   }
+  test();
 }
 
 void setup() {
@@ -67,11 +63,13 @@ void setup() {
   delay(1000);
   Serial.println("START");
   connectWifi();
-  uint16_t code = 11;
-  if(!ot.write(OpenTherm::WRITE_DATA_ID::PRIMARY_CONFIGURATION, code)){
-    Serial.println("Primary config error");
-  }
+  // uint16_t code = 11;
+  // if(!ot.write(OpenTherm::WRITE_DATA_ID::PRIMARY_CONFIGURATION, code)){
+  //   Serial.println("Primary config error");
+  // }
   //showStatus();
+  sendDataTime = WAIT;
+  previousTime = millis();
 }
 
 
@@ -92,16 +90,16 @@ void getTemperature(){
         String payload = http.getString();
         Serial.println(payload);
         float Temp = payload.toFloat();
-        CH_SETPOINT = Temp;
-//        if(!ot.write(OpenTherm::WRITE_DATA_ID::DHW_SETPOINT, Temp)) {
-//         Serial.printf("Failed to set Central Heating (CH) temperature setpoint to %.01f *C\n", CH_SETPOINT);
-//        } else Serial.printf("Sucessly set temp %01f *C\n", Temp);
+        CH_SETPOINT = roundf(Temp*10.0f)/10.0f;
+      //  if(!ot.write(OpenTherm::WRITE_DATA_ID::DHW_SETPOINT, Temp)) {
+      //   Serial.printf("Failed to set Central Heating (CH) temperature setpoint to %.01f *C\n", CH_SETPOINT);
+      //  } else Serial.printf("Sucessly set temp %01f *C\n", Temp);
       } else {
         Serial.print("Error code: ");
         Serial.println(httpResponseCode);
-        if(!ot.write(OpenTherm::WRITE_DATA_ID::CONTROL_SETPOINT_CH, 30.0f)) {
-          Serial.printf("Failed to set Central Heating (CH) temperature setpoint to %.01f *C\n", CH_SETPOINT);
-        } else Serial.printf("Error HTTTP, set temp 30*C\n");
+        // if(!ot.write(OpenTherm::WRITE_DATA_ID::CONTROL_SETPOINT_CH, 30.0f)) {
+        //   Serial.printf("Failed to set Central Heating (CH) temperature setpoint to %.01f *C\n", CH_SETPOINT);
+        // } else Serial.printf("Error HTTTP, set temp 30*C\n");
       }
       // Free resources
       http.end();
@@ -125,10 +123,55 @@ float readTemperature(){
 bool runSet(){
   Serial.print("runSet(), SetPoint temperature = ");
   Serial.println(CH_SETPOINT);
-  if(!ot.write(OpenTherm::WRITE_DATA_ID::CONTROL_SETPOINT_CH, CH_SETPOINT)) {
-     Serial.printf("Failed to set Central Heating (CH) temperature setpoint to %.01f *C\n", CH_SETPOINT);
-     return false;
-  } else return true;
+   uint8_t primaryFlags = uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_DHW_ENABLE) | uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_CH_ENABLE) | uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_COOLING_ENABLE) | uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_OTC_ENABLE);
+
+    // Send primaryFlags to the boiler to request services. Receive statusFlags from the boiler to see if it is in fault status, if it is in central heating status or domestic hot water, if it's flame is burning, etc.
+    Serial.println("Request services from the boiler and check it's status...");
+    uint8_t statusFlags;
+    if(ot.status(primaryFlags, statusFlags)) {                                                        // Mandatory support
+      Serial.printf("Status flags is 0x%02x\n", statusFlags);
+       if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_CH_ENABLE)) Serial.println("CH ENABLED");
+       if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_DHW_ENABLE)) Serial.println("HOT WATER DHW ENABLED");
+       if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::PRIMARY_CH2_ENABLE)) Serial.println("CH2 ENABLED");
+      // Show the meaning of each bit in the statusFlags received from the boiler
+      if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::SECONDARY_FAULT_INDICATION)) Serial.println("FAULT NOTIFICATION");
+      if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::SECONDARY_CH_MODE)) Serial.println("Central Heating (CH) MODE");
+      if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::SECONDARY_DHW_MODE)) Serial.println("Domestc Hot Water (DHW) MODE");
+      if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::SECONDARY_FLAME_STATUS)) Serial.println("Flame is on");
+      if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::SECONDARY_COOLING_STATUS)) Serial.println("Cooling");
+      if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::SECONDARY_CH2_MODE)) Serial.println("Second Central Heating system (CH2) is active");
+      if(statusFlags & uint8_t(OpenTherm::STATUS_FLAGS::SECONDARY_DIAGNOSTIC_IND)) Serial.println("DIAGNOSTICS INDICATION");
+    } else {
+      Serial.println("Failed to get status");
+    }
+
+
+    // Tell the boiler the desired Central Heating (CH) boiler water temperature 
+    // This is done by writing the value CH_SETPOINT to DATA-ID OpenTherm::WRITE_DATA_ID::CONTROL_SETPOINT_CH
+   
+  //konfiguracja opentherm????
+  // uint16_t code = 127; //STATUS_FLAGS?
+  // if(!ot.write(OpenTherm::WRITE_DATA_ID::PRIMARY_CONFIGURATION, code)){
+  //    Serial.println("Primary config error");
+  //  }  
+  // if(!ot.write(OpenTherm::WRITE_DATA_ID::DHW_SETPOINT, CH_SETPOINT)){
+  //   Serial.printf("Failed to set Domestic Hot Water (DHW) temperature setpoint to %.01f *C\n", CH_SETPOINT);
+  // } 
+  // if(!ot.write(OpenTherm::WRITE_DATA_ID::CONTROL_SETPOINT_CH2, CH_SETPOINT)) {
+  //    Serial.printf("Failed to set Secondary Central Heating (CH2) temperature setpoint to %.01f *C\n", CH_SETPOINT);
+  //    //return false;
+  // } //else return true;
+  // if(!ot.write(OpenTherm::WRITE_DATA_ID::CONTROL_SETPOINT_CH, CH_SETPOINT)) {
+  //    Serial.printf("Failed to set Central Heating (CH) temperature setpoint to %.01f *C\n", CH_SETPOINT);
+  //    return false;
+  // } else return true;
+  if(ot.write(OpenTherm::WRITE_DATA_ID::CONTROL_SETPOINT_CH, CH_SETPOINT)) {
+      Serial.printf("Central Heating (CH) temperature setpoint set to %.01f *C\n", CH_SETPOINT);
+      return true;
+    } else {
+      Serial.printf("Failed to set Central Heating (CH) temperature setpoint to %.01f *C\n", CH_SETPOINT);
+      return false;
+    }
 }
 
 void test(){
@@ -161,7 +204,7 @@ void setBoilerInfo(){
       serverPath += String(t);
       t = -1.0f;
        //usawienie pokrętła ogrzewania   
-      if(ot.read(OpenTherm::READ_DATA_ID::CH_SETPOINT_BOUNDS,  t)) Serial.printf("CH_SETPOINT_BOUNDS %0.01f\n", t);
+      if(ot.read(OpenTherm::READ_DATA_ID::CH_SETPOINT_BOUNDS,  t)) Serial.printf("CH_SETPOINT_BOUNDS %0.01f\n", t); 
       serverPath += "&spb=";
       serverPath += String(t);
       uint16_t u;
@@ -195,17 +238,25 @@ void setBoilerInfo(){
 
 void loop() {
 
-  showStatus();
-  delay(step);
+  
+  
+  
   //getTemperature();
-  runSet();
-  waitingTime += step;
-  if(waitingTime > WAIT){
-    getTemperature();
-    setBoilerInfo();
-    waitingTime = 0;
+  currentTime = millis();
+  timePass = (uint32_t)(currentTime - previousTime);
+  if(timePass >= 1000) {
+    sendDataTime += timePass;
+    previousTime = currentTime;
+    runSet();
+    step++;
+    if(step % 10 == 0) showStatus();
+    if(step >= 1000) step = 0;
+    if(sendDataTime >= WAIT){
+      getTemperature();
+      setBoilerInfo();
+      sendDataTime = 0;
+    }
   }
-  delay(step);
-  waitingTime += step;
+  delay(50);
   //test(); 
 }

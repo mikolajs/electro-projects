@@ -1,0 +1,1 @@
+po skopiowaniu pliku nadać własność root i dla chrome-sandbox chmod 4755. 
