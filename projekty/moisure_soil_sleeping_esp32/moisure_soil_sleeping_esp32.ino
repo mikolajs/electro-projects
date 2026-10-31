@@ -5,10 +5,11 @@
 //#include "esp_wifi.h"
 #include <HTTPClient.h>
 #include <WiFiClient.h>
-#define SENSOR_PIN 4
+#define SENSOR_PIN 1
 #define POWER_PIN1 3
 #define POWER_PIN2 2
-#define TIME_TO_SLEEP 8640
+//#define TIME_TO_SLEEP 8640
+#define TIME_TO_SLEEP 10
 
 void connectWifi(){
   WiFi.mode(WIFI_STA);
@@ -57,33 +58,35 @@ void sendData(int moisure){
 }
 ///Dodać MOSFED do włączania i wyłączania zasilania dla czujnika wilgoci ziemi
 void setup() {
-  //Serial.begin(115200);
+  Serial.begin(115200);
   connectWifi();
-  pinMode(POWER_PIN1, OUTPUT);
-  pinMode(POWER_PIN2, OUTPUT);
+  // pinMode(POWER_PIN1, OUTPUT);
+  // pinMode(POWER_PIN2, OUTPUT);
   delay(10);
-  digitalWrite(POWER_PIN1, HIGH);
-  digitalWrite(POWER_PIN2, LOW);
-  delay(100);
+  // digitalWrite(POWER_PIN1, HIGH);
+  // digitalWrite(POWER_PIN2, LOW);
+  // Serial.print("Power on ");
+  // delay(10000);
   int val = analogRead(SENSOR_PIN);
-  // Serial.print("Soil moisure val = ");
-  // Serial.println(val);
-  sendData(val);
+  Serial.print("Soil moisure val = ");
+  Serial.println(val);
+  //sendData(val);
   // if (Serial) {
   //   Serial.flush();
   // }
   WiFi.disconnect(true); // Rozłącza połączenie i usuwa dane uwierzytelniające
   WiFi.mode(WIFI_OFF);
-  digitalWrite(POWER_PIN1, LOW);
+  // digitalWrite(POWER_PIN1, LOW);
+  // digitalWrite(POWER_PIN2, LOW);
   pinMode(SENSOR_PIN, INPUT);
   // esp_wifi_stop();
   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * 1000000ULL);
-  // Serial.println("Go to sleep...");
-  // Serial.flush();
+  Serial.println("Go to sleep...");
+  Serial.flush();
   delay(100);
   esp_deep_sleep_start();
   delay(100);
-  // Serial.println("Cannot sleep!");
+  Serial.println("Cannot sleep!");
 }
 
 void loop() {

@@ -1,6 +1,6 @@
 #define uS_TO_S_FACTOR 1000000ULL  // Conversion factor for micro seconds to seconds
 #define TIME_TO_SLEEP  20 
-
+//na tunelu i esp32 dużym
 #define POMP1 23
 #define POMP1_TIME 9000
 RTC_DATA_ATTR int bootCount = 0;

@@ -1,10 +1,10 @@
 //esp32-wroom-da module
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include <NTPClient.h>
+//#include <NTPClient.h>
 #include <WiFiUdp.h>
 #define POMP1 23
-#define POMP1_TIME 10000
+#define POMP1_TIME 12000
 RTC_DATA_ATTR int bootCount = 0;
 // uint32_t wakeCounter = 0;
 // uint32_t rtcMemoryOffset = 0;
